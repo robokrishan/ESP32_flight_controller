@@ -4,20 +4,23 @@
 #include <LiquidCrystal_I2C.h>
 #define POT_MIN 0
 #define POT_MAX 4095
-#define DUTY_MIN 1200
+#define DUTY_MIN 1000
 #define DUTY_MAX 2000
 
 const char* ssid = "Hasenhoeft";
 const char* pwd = "21162010819665839679";
-const int POT = 34;
+const int POT = 39;
+const int joyX_pin = 34;
+const int joyY_pin = 35;
+int joyX, joyY;
 int pot_val, duty;
 LiquidCrystal_I2C lcd(39, 16, 2);
 AsyncWebServer server(80);
 
-String readPOT() {
+String readPOTstring() {
   pot_val = analogRead(POT);
-  //duty = map(pot_val, POT_MIN, POT_MAX, DUTY_MIN, DUTY_MAX);
-  return(String(pot_val));
+  duty = map(pot_val, POT_MIN, POT_MAX, DUTY_MIN, DUTY_MAX);
+  return(String(duty));
 }
 
 
@@ -50,8 +53,8 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/pot", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/plain", readPOT().c_str());
+  server.on("/pot_string", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain", readPOTstring().c_str());
   });
 
   server.begin();
@@ -65,5 +68,13 @@ void loop() {
   lcd.setCursor(0,1);
   lcd.print("    ");
   lcd.setCursor(0,1);
-  lcd.print(readPOT());
+  lcd.print(readPOTstring());
+  joyX = analogRead(joyX_pin);
+  joyX = map(joyX, POT_MIN, POT_MAX, 0, 1023);
+  joyY = analogRead(joyY_pin);
+  joyY = map(joyY, POT_MIN, POT_MAX, 0, 1023);
+  Serial.print("X:\t");
+  Serial.print(joyX);
+  Serial.print("\tY:\t");
+  Serial.println(joyY);
 }

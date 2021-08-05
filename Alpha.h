@@ -19,25 +19,32 @@
 
 class Alpha {
 	public:
+		// Constructors
 		Alpha();
 		Alpha(int esc1, int esc2, int esc3, int esc4);
+
+		// ESC Configuration
 		void attachESC();
 		void setESCPins(int pin1, int pin2, int pin3, int pin4);
 		void setPOTPin(int pot);
+		void beginBLDC();
+		void fly();
+
+		// LCD Configuration
 		void setLCDAddress(int addr);
 		void setLCDDimensions(int width, int height);
+		void beginLCD();
+		void updateLCD();
+		void updateLCDRC();
+
+		// Web Server Configuration
 		void setPOTIP(char* ip);
 		void setSSID(char* ssid_in);
 		void setPWD(char* pwd_in);
-		int readDuty();
-		String readPot();
-		void beginLCD();
-		void beginBLDC();
-		void updateLCD();
-		void updateLCDRC();
-		String httpGETRequest(const char* serverName);
-		void fly();
 		void connect();
+		String httpGETRequest(const char* serverName);
+		void readPot();
+		String readPotRC();
 
 	private:
 		// ESCs

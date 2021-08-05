@@ -1,12 +1,10 @@
-//#include <HTTPClient.h>
-//#include <WiFi.h>
 #include <Alpha.h>
 
 Alpha copter;
 
 const char* ssid = "Hasenhoeft";
 const char* pwd = "21162010819665839679";
-const char* pot_server = "http://192.168.178.31/pot";
+const char* pot_server = "http://192.168.178.31/pot_string";
 
 void setup() {
   // put your setup code here, to run once:

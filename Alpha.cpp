@@ -25,6 +25,7 @@ Alpha::Alpha() {
 	bl_esc_pin = 0;
 	br_esc_pin = 0;
 }
+
 Alpha::Alpha(int esc1, int esc2, int esc3, int esc4) {
 	// Create object
 	Alpha();
@@ -32,6 +33,7 @@ Alpha::Alpha(int esc1, int esc2, int esc3, int esc4) {
 	// Set ESC pins
 	setESCPins(esc1, esc2, esc3, esc4);
 }
+
 
 // Public Member Functions
 void Alpha::attachESC() {
@@ -54,6 +56,7 @@ void Alpha::attachESC() {
 	Serial.println(br_esc_pin);
 	task++;
 }
+
 void Alpha::setESCPins(int pin1, int pin2, int pin3, int pin4) {
 	// Update ESC pins
 	fl_esc_pin = pin1;
@@ -74,6 +77,7 @@ void Alpha::setESCPins(int pin1, int pin2, int pin3, int pin4) {
 	Serial.println(br_esc_pin);
 	task++;
 }
+
 void Alpha::setPOTPin(int pot) {
 	// Set Potentiometer Pin
 	debug_pot = pot;
@@ -85,6 +89,7 @@ void Alpha::setPOTPin(int pot) {
 	Serial.println(debug_pot);
 	task++;
 }
+
 void Alpha::setLCDAddress(int addr) {
 	// Update LCD I2C Address (HEX)
 	lcd_addr = addr;
@@ -96,6 +101,7 @@ void Alpha::setLCDAddress(int addr) {
 	Serial.println(lcd_addr, HEX);
 	task++;
 }
+
 void Alpha::setLCDDimensions(int width, int height) {
 	// Update LCD Dimensions
 	lcd_width = width;
@@ -112,6 +118,7 @@ void Alpha::setLCDDimensions(int width, int height) {
 	Serial.println(")");
 	task++;
 }
+
 void Alpha::beginLCD() {
 	// Create LCD Object
 	lcd = new LiquidCrystal_I2C(lcd_addr, lcd_width, lcd_height);
@@ -140,6 +147,7 @@ void Alpha::beginLCD() {
 	Serial.println(lcd_addr, HEX);
 	task++;
 }
+
 void Alpha::beginBLDC() {
 	// Write Duty-LOW to BLDCs
 	fl_esc.writeMicroseconds(duty);
@@ -154,6 +162,7 @@ void Alpha::beginBLDC() {
 	Serial.println("μs");
 	task++;
 }
+
 void Alpha::updateLCD() {
 	lcd->setCursor(1, 0);
 	lcd->print("POT");
@@ -162,34 +171,45 @@ void Alpha::updateLCD() {
 	lcd->setCursor(1, 1);
 	lcd->print("      ");
 	lcd->setCursor(0, 1);
-	lcd->print(readPot());
+	lcd->print(readPotRC());
 	lcd->setCursor(11, 1);
 	lcd->print("      ");
 	lcd->setCursor(11, 1);
-	lcd->print(readDuty());
+	readPot();
+	lcd->print(duty);
 }
+
 void Alpha::updateLCDRC() {
 	lcd->setCursor(0, 0);
 	lcd->print("Receiving:");
 	lcd->setCursor(0, 1);
 	lcd->print("    ");
 	lcd->setCursor(0, 1);
-	lcd->print(readPot());
+
+	lcd->print(readPotRC());
+	readPot();
 }
-String Alpha::readPot() {
+
+String Alpha::readPotRC() {
 	pot_val_rc = httpGETRequest(POT_SERVER);
 	return pot_val_rc;
 }
-int Alpha::readDuty() {
-	duty = map(pot_val, POT_MIN, POT_MAX, DUTY_MIN, DUTY_MAX);
-	return duty;
+
+void Alpha::readPot() {
+	duty = pot_val_rc.toInt();
+	//duty = map(pot_val, POT_MIN, POT_MAX, DUTY_MIN, DUTY_MAX);
 }
+
+
+
+
 void Alpha::fly() {
 	fl_esc.writeMicroseconds(duty);
 	fr_esc.writeMicroseconds(duty);
 	bl_esc.writeMicroseconds(duty);
 	br_esc.writeMicroseconds(duty);
 }
+
 void Alpha::setPOTIP(char* ip) {
 	POT_SERVER = ip;
 	Serial.print("[");
