@@ -16,6 +16,7 @@ Alpha::Alpha() {
 	// Initialize Private Variables e.g. Pins, Dimensions, Addresses
 	debug_pot = 0;
 	pot_val = 0;
+	pot_val_rc = "0";
 	lcd_addr = 39;
 	duty = 1000;
 	lcd_width = lcd_height = 0;
@@ -117,7 +118,8 @@ void Alpha::beginLCD() {
 	Serial.print("[");
 	Serial.print(task);
 	Serial.print("]\tLCD Display object created!\t\t");
-	Serial.print("("); Serial.print(lcd_width); Serial.print(", "); Serial.print(lcd_height);
+	Serial.print("("); Serial.print(lcd_width); Serial.print(", ");
+	Serial.print(lcd_height);
 	Serial.println(")");
 	task++;
 
@@ -166,9 +168,17 @@ void Alpha::updateLCD() {
 	lcd->setCursor(11, 1);
 	lcd->print(readDuty());
 }
-int Alpha::readPot() {
-	pot_val = analogRead(debug_pot);
-	return pot_val;
+void Alpha::updateLCDRC() {
+	lcd->setCursor(0, 0);
+	lcd->print("Receiving:");
+	lcd->setCursor(0, 1);
+	lcd->print("    ");
+	lcd->setCursor(0, 1);
+	lcd->print(readPot());
+}
+String Alpha::readPot() {
+	pot_val_rc = httpGETRequest(POT_SERVER);
+	return pot_val_rc;
 }
 int Alpha::readDuty() {
 	duty = map(pot_val, POT_MIN, POT_MAX, DUTY_MIN, DUTY_MAX);
@@ -179,4 +189,79 @@ void Alpha::fly() {
 	fr_esc.writeMicroseconds(duty);
 	bl_esc.writeMicroseconds(duty);
 	br_esc.writeMicroseconds(duty);
+}
+void Alpha::setPOTIP(char* ip) {
+	POT_SERVER = ip;
+	Serial.print("[");
+	Serial.print(task);
+	Serial.print("]\tConfigured Transmitter Addr.\t\t");
+	Serial.println(POT_SERVER);
+	task++;
+}
+
+String Alpha::httpGETRequest(const char* serverName) {
+  WiFiClient client;
+  HTTPClient http;
+
+  // Your Domain name with URL path or IP address with path
+  http.begin(client, serverName);
+
+  // Send HTTP POST request
+  int httpResponseCode = http.GET();
+
+  String payload = "--";
+
+  if (httpResponseCode>0) {
+    payload = http.getString();
+  }
+  else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  // Free resources
+  http.end();
+
+  return payload;
+}
+
+void Alpha::connect() {
+	WiFi.mode(WIFI_STA);
+	WiFi.begin(ssid, pwd);
+	Serial.print("[");
+	Serial.print(task);
+	Serial.print("]\tConnecting to network\t\t\t");
+	while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+	Serial.println();
+	task++;
+	Serial.print("[");
+	Serial.print(task);
+	Serial.print("]\tConnected to ");
+	Serial.print(ssid);
+	Serial.print("\t\t\t");
+	Serial.println(WiFi.localIP());
+	task++;
+}
+
+void Alpha::setSSID(char* ssid_in) {
+	ssid = ssid_in;
+	Serial.print("[");
+	Serial.print(task);
+	Serial.print("]\tConfigured WIFI\t\t\t\t");
+	Serial.println(ssid);
+	task++;
+}
+
+void Alpha::setPWD(char* pwd_in) {
+	pwd = pwd_in;
+	Serial.print("[");
+	Serial.print(task);
+	Serial.print("]\tConfigured Password\t\t\t");
+	for(int i = 0; i < strlen(pwd_in); i++) {
+		Serial.print("*");
+	}
+	Serial.println();
+	task++;
 }

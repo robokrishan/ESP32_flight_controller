@@ -13,6 +13,9 @@
 #include "Arduino.h"
 #include <ESP32Servo.h>
 #include <LiquidCrystal_I2C.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+
 
 class Alpha {
 	public:
@@ -23,14 +26,21 @@ class Alpha {
 		void setPOTPin(int pot);
 		void setLCDAddress(int addr);
 		void setLCDDimensions(int width, int height);
+		void setPOTIP(char* ip);
+		void setSSID(char* ssid_in);
+		void setPWD(char* pwd_in);
 		int readDuty();
-		int readPot();
+		String readPot();
 		void beginLCD();
 		void beginBLDC();
 		void updateLCD();
+		void updateLCDRC();
+		String httpGETRequest(const char* serverName);
 		void fly();
+		void connect();
 
 	private:
+		// ESCs
 		int fl_esc_pin;
 		int fr_esc_pin;
 		int bl_esc_pin;
@@ -39,13 +49,21 @@ class Alpha {
 		Servo fr_esc;
 		Servo bl_esc;
 		Servo br_esc;
-		LiquidCrystal_I2C *lcd;
 		int debug_pot;
-		int task;
-		int lcd_addr;
 		uint16_t duty;
 		int pot_val;
+		String pot_val_rc;
+		int task;
+
+		// LCD Display
+		LiquidCrystal_I2C *lcd;
 		int lcd_width, lcd_height;
+		int lcd_addr;
+
+		// Wireless
+		char* ssid;
+		char* pwd;
+		char* POT_SERVER;
 };
 
 
